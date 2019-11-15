@@ -16,56 +16,39 @@ public:
     rightMotors.spin(fwd);
   }
 
+  // Intake Motor fwd 50% power
   static void bL1Pressed() {
-    // Intake Motor fwd 50% power
-    intakeMotors.setVelocity(50, velocityUnits::pct);
+    intakeMotors.setVelocity(100, velocityUnits::pct);
     intakeMotors.spin(fwd);
   }
 
+  // Intake Motor rev 50% power
+
   static void bL2Pressed() {
-    // Intake Motor rev 50% power
-    intakeMotors.setVelocity(50, velocityUnits::pct);
+    intakeMotors.setVelocity(100, velocityUnits::pct);
     intakeMotors.spin(directionType::rev);
   }
+  // Arm Motor Forward
 
   static void bL3Pressed() {
-    // Arm Motor Forward
-    armMotor.setVelocity(50, pct);
+    armMotor.setVelocity(100, pct);
     armMotor.spin(fwd);
   }
 
+  // Arm Motor Reverse 50% power
   static void cLPressed() {
-    // Arm Motor Reverse 50% power
-    armMotor.setVelocity(50, pct);
+    Brain.Screen.printAt(1, 50, true, "armDownWasCalled");
+    armMotor.setVelocity(100, pct);
     armMotor.spin(directionType::rev);
   }
 
-  /* empty functions will be called later once the drive team figures out their
-   * layout*/
-  static void bR1Pressed() {
-    //    ObjectTracking::setVisionIndex(ObjectTracking::getVisionIndex() + 1);
-
-    driveForDistance(distanceUnits::cm, 111.76, velocityUnits::pct, 50,
-                     leftMotors);
-    driveForDistance(distanceUnits::cm, 111.76, velocityUnits::pct, 50,
-                     rightMotors);
-  }
-
+  static void bR1Pressed() {}
   static void bR2Pressed() {}
+  static void bR3Pressed() { pistonMotor.spin(fwd, 100, pct); }
+  static void cRPressed() { pistonMotor.spin(fwd, 100, pct); }
 
-  static void bR3Pressed() {
-    // Piston Motor Forward 50% power
-    pistonMotor.setVelocity(50, pct);
-    pistonMotor.spin(fwd);
-  }
+  /* ~~~~ Released Functions ~~~~ */
 
-  static void cRPressed() {
-    // Arm Motor Forward 50% power
-    pistonMotor.setVelocity(50, pct);
-    pistonMotor.spin(directionType::rev);
-  }
-
-  // Released Functions
   static void bLReleased() {
     // Stopping Left Intake Motor
     intakeMotors.stop();
@@ -76,26 +59,24 @@ public:
     armMotor.stop();
   }
 
-  // right bumper release
-  static void bRReleased() { intakeMotors.stop(); }
-
-  static void bR3Released() {
-    // Stopping  Piston Motor
-    pistonMotor.stop();
+  static void cLReleased() {
+    // Stopping Arm Motor
+    armMotor.stop();
   }
 
-  static void driveForDistance(distanceUnits distanceUnit, double distanceVal,
-                               velocityUnits velcUnit, double velVal,
+  // R1,R2 release
+  static void bRReleased() { intakeMotors.stop(); }
+
+  // Stopping  Piston Motor
+  static void bR3Released() { pistonMotor.stop(); }
+
+  static void cRReleased() { pistonMotor.stop(); }
+
+  static void driveForDistance(directionType dir, double distanceVal,
+                               double velVal, velocityUnits velcUnit, bool wait,
                                motor_group motorGroup) {
-    if (distanceUnit == distanceUnits::cm) {
-      distanceVal = distanceVal / 2.54;
-    } else if (distanceUnit == mm) {
-      distanceVal = (distanceVal * 10) / 2.54;
-    }
+    distanceVal = distanceVal * (360 / (3.14159 * 3.25));
 
-    double inchesPerDegree = (3.14159 * 3.25) / 360;
-    distanceVal = distanceVal / inchesPerDegree;
-
-    motorGroup.rotateTo(distanceVal, deg, velVal, velcUnit, false);
+    motorGroup.spinFor(dir, distanceVal, deg, velVal, velcUnit, wait);
   }
 };

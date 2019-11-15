@@ -58,9 +58,7 @@ distanceUnits cm = distanceUnits::cm;
 competition Competition;
 
 // updateVision event for vision
-event updateVision = event();
-event updateTurn = event();
-event updateDistance = event();
+event ObjectTracking = event();
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
@@ -77,7 +75,6 @@ void pre_auton(void) {
   // Example: clearing encoders, setting servo positions, ...
 
   // setting up sensor
-  //objectTracker.intiSensor();
 }
 
 void autonomous(void) {
@@ -89,36 +86,22 @@ void autonomous(void) {
 void usercontrol(void) {
   // User control code here, inside the loop
   Brain.Screen.render(true);
+
   while (1) {
     //~~~ Pressed Functions ~~~
-    /*Currently I have the functions named as the input they are described as in
-     * the Controllerler layout sheet. I am doing it this way so when we have
-     * our mutiple Controller scheme files for each driver we will only have to
-     * swap out the ControllerScheme.cpp file ansd will not have to change
-     * anything else. This can cause confusion for those who have not looked at
-     * the control layout. Please do so
 
-      Also the motors are labeled by the letter taped onto them again this was a
-     drive team instruction and is a temp solution
-
-     The alternative to an if else chain is an event based code system using the
-     pressed() functions. The downside to the event based aproach is a lower
-     update rate for motor values
-
-     */
-
-    // left 1,2
+    // left 1,2 3
     Controller.ButtonL1.pressed(ControllerInteraction::bL1Pressed);
     Controller.ButtonL2.pressed(ControllerInteraction::bL2Pressed);
-
-    // right 1,2
-    Controller.ButtonR1.pressed(ControllerInteraction::bR1Pressed);
-    Controller.ButtonR2.pressed(ControllerInteraction::bR2Pressed);
     Controller.ButtonRight.pressed(ControllerInteraction::bL3Pressed);
 
-    Controller.ButtonDown.pressed(ControllerInteraction::cLPressed);
-
+    // right 1,23
+    Controller.ButtonR1.pressed(ControllerInteraction::bR1Pressed);
+    Controller.ButtonR2.pressed(ControllerInteraction::bR2Pressed);
     Controller.ButtonY.pressed(ControllerInteraction::bR3Pressed);
+
+    //
+    Controller.ButtonDown.pressed(ControllerInteraction::cLPressed);
     Controller.ButtonB.pressed(ControllerInteraction::cRPressed);
 
     // left 1,2 released
@@ -147,48 +130,67 @@ void usercontrol(void) {
 static void updateVisionSensor() {
   // setting up screen
   Brain.Screen.setFont(mono40);
-  Brain.Screen.clearLine(1, black);
-  Brain.Screen.setCursor(1, 1);
 
   // fetch the list of objects that match our signature
   Vision.takeSnapshot(GREEN_CUBE);
+  Brain.Screen.printAt(0, 50, true, "Updated Screen.");
 }
 
 static void adjustTurn() {
-  Brain.Screen.setFont(mono40);
-  Brain.Screen.clearLine(1, black);
-  Brain.Screen.setCursor(1, 1);
-  VexVisionObject object = Vision.largestObject;
+  /*VexVisionObject object = Vision.largestObject;
 
   if (object.originX < 76) {
-    Brain.Screen.print("left of bot");
-    leftMotors.spinFor(fwd, 90,deg, 100, velocityUnits::pct,
-                       false);
-                       
-  } else if (object.originX > 84) {
-    Brain.Screen.print("right of bot");
-    rightMotors.spinFor(fwd, 90, deg, 100, velocityUnits::pct,
-                        false);
+    Brain.Screen.printAt(0, 150, true, "%d", object.originX);
+    // leftMotors.spinFor(fwd, leftMotors.rotation(deg) + 5, deg, 20,
+    //                 velocityUnits::pct, false);
+    leftMotors.setPosition(leftMotors.rotation(deg) + 30, deg);
+    return false;
   }
+
+  if (object.originX > 84) {
+    Brain.Screen.printAt(1, 150, true, "%d", object.originX);
+    // rightMotors.spinFor(fwd, rightMotors.rotation(deg) + 5, deg, 20,
+    //                   velocityUnits::pct, false);
+    rightMotors.setPosition(leftMotors.rotation(deg) + 30, deg);
+    return false;
+  }
+
+  leftMotors.stop();
+  rightMotors.stop();
+  return true;*/
 }
 
-static void adjustDistance() {
+static bool adjustDistance() {
   Brain.Screen.setFont(mono40);
   Brain.Screen.clearLine(3, black); // sd
   Brain.Screen.setCursor(3, 1);
   VexVisionObject object = Vision.largestObject;
 
   if (object.width < 158 || object.height < 152) {
-    leftMotors.spinFor(fwd, 90, deg, 100, velocityUnits::pct,
-                       false);
-    rightMotors.spinFor(fwd, 90, deg, 100, velocityUnits::pct,
-                        false);
+    leftMotors.spinFor(
+        fwd,
+        (leftWheelMotorB.rotation(deg) + leftWheelMotorD.rotation(deg)) / 2 + 5,
+        deg, 100, velocityUnits::pct, false);
+    rightMotors.spinFor(
+        fwd,
+        (rightWheelMotorA.rotation(deg) + rightWheelMotorC.rotation(deg)) / 2 +
+            5,
+        deg, 100, velocityUnits::pct, false);
+    return false;
   } else if (object.width > 165 || object.height < 150) {
-    leftMotors.spinFor(reverse, 90,deg, 100, velocityUnits::pct,
-                       false);
-    rightMotors.spinFor(reverse, 90, deg, 100,
-                        velocityUnits::pct, false);
+    leftMotors.spinFor(
+        reverse,
+        (leftWheelMotorB.rotation(deg) + leftWheelMotorD.rotation(deg)) / 2 + 5,
+        deg, 100, velocityUnits::pct, false);
+    rightMotors.spinFor(
+        reverse,
+        (rightWheelMotorA.rotation(deg) + rightWheelMotorC.rotation(deg)) / 2 +
+            5,
+        deg, 100, velocityUnits::pct, false);
+    return false;
   }
+  printf("test");
+  return true;
 }
 
 static void intiSensor() {
@@ -197,7 +199,16 @@ static void intiSensor() {
   Vision.setMode(vision::detectionMode::objectDetect);
   Vision.setWifiMode(vision::wifiMode::off);
   Vision.setLedMode(vision::ledMode::automatic);
+  leftWheelMotorB.setBrake(coast);
+  leftWheelMotorD.setBrake(coast);
+  rightWheelMotorA.setBrake(coast);
+  rightWheelMotorC.setBrake(coast);
+}
 
+void callBack() {
+  updateVisionSensor();
+  Brain.Screen.printAt(1, 100, true, "ObjectCount: %d", Vision.objectCount);
+  adjustTurn();
 }
 
 int main() {
@@ -207,20 +218,32 @@ int main() {
 
   // Run the pre-autonomous function.
   pre_auton();
-  intiSensor();
 
-  // check signature event setup
+  // pickup first 4
+  /* ControllerInteraction::driveForDistance(
+       fwd, 38.5, inches, 25, velocityUnits::pct, false, leftMotors);
 
-  // task setup
-  updateVision(updateVisionSensor);
-  updateTurn(adjustTurn);
-  updateDistance(adjustDistance);
+   ControllerInteraction::driveForDistance(
+       fwd, 38.5, inches, 25, velocityUnits::pct, true, rightMotors);
 
-  // Prevent main from exiting with an infinite loop.
+   // turn to face wall
+   ControllerInteraction::driveForDistance(
+       reverse, 4, inches, 25, velocityUnits::pct, false, leftMotors);
+   ControllerInteraction::driveForDistance(
+       fwd, 4, inches, 25, velocityUnits::pct, true, rightMotors);
+
+
+ //reverse
+   ControllerInteraction::driveForDistance(
+       reverse, 38, inches, 25, velocityUnits::pct, false, leftMotors);
+
+   ControllerInteraction::driveForDistance(
+       reverse, 38, inches, 25, velocityUnits::pct, true, rightMotors);
+
+   // Prevent main from exiting with an infinite loop.
+   */
   while (true) {
-    updateVision.broadcastAndWait();
-    updateTurn.broadcastAndWait();
-    updateDistance.broadcastAndWait();
+    // ObjectTracking.broadcastAndWait();
     wait(100, msec);
   }
 }
