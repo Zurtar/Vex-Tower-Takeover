@@ -21,13 +21,10 @@ public:
 
   static void bL2Pressed() {
     // Intake Motor rev 50% power
-    pistonMotor.spin(reverse,100,pct);
+    pistonMotor.spin(reverse, 100, pct);
   }
 
-  static void bL3Pressed() {
-    // Arm Motor Forward
-    armMotors.spin(fwd, 50, pct);
-  }
+  static void bL3Pressed() {}
 
   static void cLPressed() {
     // Arm Motor Reverse 50% power
@@ -36,25 +33,15 @@ public:
 
   /* empty functions will be called later once the drive team figures out their
    * layout*/
-  static void bR1Pressed() {
-    //    ObjectTracking::setVisionIndex(ObjectTracking::getVisionIndex() + 1);
+  static void bR1Pressed() { intakeMotors.spin(reverse, 50, pct); }
 
-    driveForDistance(distanceUnits::cm, 111.76, velocityUnits::pct, 50,
-                     leftMotors);
-    driveForDistance(distanceUnits::cm, 111.76, velocityUnits::pct, 50,
-                     rightMotors);
-  }
+  static void bR2Pressed() { pistonMotor.spin(fwd, 100, pct); }
 
-  static void bR2Pressed() {}
-
-  static void bR3Pressed() {
-    // Piston Motor Forward 50% power
-    pistonMotor.spin(fwd, 50, pct);
-  }
+  static void bR3Pressed() {}
 
   static void cRPressed() {
     // Arm Motor Forward 50% power
-    pistonMotor.spin(reverse, 100, pct);
+    armMotors.spin(fwd, 50, pct);
   }
 
   // Released Functions
