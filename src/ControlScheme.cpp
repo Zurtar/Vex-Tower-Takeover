@@ -21,7 +21,7 @@ public:
 
   static void bL2Pressed() {
     // Intake Motor rev 50% power
-    intakeMotors.spin(reverse, 50, pct);
+    pistonMotor.spin(reverse,100,pct);
   }
 
   static void bL3Pressed() {
