@@ -3,6 +3,8 @@
 // alphabetical order which fucks up some dependancies
 #include <iostream>
 
+
+//CIERANS LAYOUT
 class ControllerInteraction {
 
 public:
@@ -39,10 +41,40 @@ public:
   static void bR1Pressed() {
     //    ObjectTracking::setVisionIndex(ObjectTracking::getVisionIndex() + 1);
 
-    driveForDistance(distanceUnits::cm, 111.76, velocityUnits::pct, 50,
-                     leftMotors);
-    driveForDistance(distanceUnits::cm, 111.76, velocityUnits::pct, 50,
-                     rightMotors);
+    driveForDistance(fwd, distanceUnits::cm, 111.76, velocityUnits::pct, 50,
+                     leftMotors, false);
+    driveForDistance(fwd, distanceUnits::cm, 111.76, velocityUnits::pct, 50,
+                     rightMotors, true);
+
+    // back to turn point
+    driveForDistance(reverse, inches, -10.5, velocityUnits::pct, 50, leftMotors,
+                     false);
+    driveForDistance(reverse, inches, -10.5, velocityUnits::pct, 50,
+                     rightMotors, true);
+
+    // swing! TODO
+
+    // backup to wall and straighten (check val for second)
+    driveForDistance(reverse, inches, -32, velocityUnits::pct, 50, leftMotors,
+                     false);
+    driveForDistance(reverse, inches, -36, velocityUnits::pct, 50, rightMotors,
+                     true);
+
+    // Go collect blocks
+    driveForDistance(reverse, inches, 39, velocityUnits::pct, 50, leftMotors,
+                     false);
+    driveForDistance(reverse, inches, 39, velocityUnits::pct, 50, rightMotors,
+                     true);
+
+    // getto point for next swing
+    driveForDistance(reverse, inches, -9.5, velocityUnits::pct, 50, leftMotors,
+                     false);
+    driveForDistance(reverse, inches, -9.5, velocityUnits::pct, 50, rightMotors,
+                     true);
+
+    // swing! todo!
+
+    // go home! todo!
   }
 
   static void bR2Pressed() {}
@@ -78,9 +110,10 @@ public:
     pistonMotor.stop();
   }
 
-  static void driveForDistance(distanceUnits distanceUnit, double distanceVal,
+  static void driveForDistance(directionType direction,
+                               distanceUnits distanceUnit, double distanceVal,
                                velocityUnits velcUnit, double velVal,
-                               motor_group motorGroup) {
+                               motor_group motorGroup, bool wait) {
     if (distanceUnit == distanceUnits::cm) {
       distanceVal = distanceVal / 2.54;
     } else if (distanceUnit == mm) {
@@ -90,6 +123,10 @@ public:
     double inchesPerDegree = (3.14159 * 3.25) / 360;
     distanceVal = distanceVal / inchesPerDegree;
 
-    motorGroup.rotateTo(distanceVal, deg, velVal, velcUnit, false);
+    if (direction == reverse) {
+      distanceVal = distanceVal * -1;
+    }
+
+    motorGroup.rotateTo(distanceVal, deg, velVal, velcUnit, wait);
   }
 };

@@ -23,7 +23,7 @@ class GUI {
 
   static void displayAutoSelect();
   static void displayRunning();
-  static bool isCirclePressed(Circle bound);
+  static bool isCirclePressed(Circle bound, int pX, int pY);
 
 public:
   static void updateScreen();

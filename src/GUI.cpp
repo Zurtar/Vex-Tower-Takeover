@@ -65,7 +65,6 @@ vector<Circle> runningBounds = {};
 // god this is ugly
 
 void GUI::displayMainMenu() {
-  Controller.Screen.print(currentState);
   for (Circle circle : menuBounds) {
     Brain.Screen.drawCircle(circle.getDX(), circle.getDY(), circle.getRadius());
   }
@@ -106,19 +105,10 @@ void GUI::displayRunning() {
 }
 
 // https://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle#481150
-bool GUI::isCirclePressed(Circle bound) {
-
-  if (pow(Brain.Screen.xPosition() - bound.getDX(), 2) +
-          pow(Brain.Screen.yPosition() - bound.getDY(), 2) <
-      pow(r, 2)) {
-    return true;
-  }
-  return false;
-}
 
 void GUI::updateScreen() {
-  // see screen pressed so this makes sense
-  /*thats right folks I am using a function with a switch statment to call a
+  /*see screen pressed so this makes sense
+  thats right folks I am using a function with a switch statment to call a
    * function with the exact same switch statement but with a different
    * operation within it. */
 
@@ -132,6 +122,16 @@ void GUI::updateScreen() {
   case RUNNING:
     displayRunning();
     break;
+  }
+}
+
+void checkBound(vector<Circle> boundList, int pX, int pY) {
+  for (Circle bound : boundList) {
+    if (pow((pX - bound.getDX()), 2) + pow((pY - bound.getDY()), 2) <
+        pow(r, 2)) {
+      currentState = bound.getTriggerState();
+      return;
+    }
   }
 }
 
@@ -153,7 +153,7 @@ void GUI::updateScreen() {
  switch but we have to change up the return and breaks. The return is to
  prevent wasted resources looping through the rest of the array again a
  miiscule impact but good practice
- */
+
 
 void GUI::screenPressed() {
   switch (currentState) {
@@ -188,3 +188,4 @@ void GUI::screenPressed() {
     break;
   }
 }
+*/
